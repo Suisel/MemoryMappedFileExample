@@ -9,7 +9,7 @@ public class MemoryMappedFileExample {
     static long length = 536870912; //2Gb
 
     public static void main(String[] args) throws Exception {
-        MappedByteBuffer out = new RandomAccessFile("howtodoinjava.dat", "rw")
+        MappedByteBuffer out = new RandomAccessFile("OutputFile.txt", "rw")
                 .getChannel().map(FileChannel.MapMode.READ_WRITE, 0, length*4-1);
         for (int i = 0; i < length; i++) {
             byte[] bigInteger = bigIntGenerator().toByteArray();
@@ -21,6 +21,7 @@ public class MemoryMappedFileExample {
             }
 
             for (int j = 0; j < bigInteger.length; j++) {
+                //System.out.println(bigInteger[j]);
                 out.put(bigInteger[j]);
             }
         }
