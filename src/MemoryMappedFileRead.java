@@ -23,17 +23,21 @@ public class MemoryMappedFileRead {
 
         long a = 0;
         long b = 0;
+        long c = 255;
         BigInteger sum = BigInteger.valueOf(0);
         //You can read the file from this buffer the way you like.
         for (int i = 0; i < 536870911; i++) {
 
             b = 0;
+            c = 255;
             for (int j = 0; j < 4; j++) {
                 a = buffer.get() << (8 * j);
-                b = a | b;
+                b = b | (a & c);
+                c = c << (8 * j);
             }
             BigInteger temp = BigInteger.valueOf(b);
             sum = sum.add(temp);
+
         }
         System.out.println(sum); //Print the sum
 
