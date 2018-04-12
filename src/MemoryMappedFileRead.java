@@ -8,52 +8,23 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
+import static com.sun.deploy.util.BufferUtil.GB;
+
 public class MemoryMappedFileRead {
-    final static int size = 536870911;
+
     final static int numThreads = 4;
-    private static String bigFile = "javatext.txt";
+    private static String bigFile = "java2.txt";
 
     public static void main(String[] args) throws Exception {
-//        //Create file object
-//        File file = new File(bigFile);
-//
-//        //Get file channel in readonly mode
-//        FileChannel fileChannel = new RandomAccessFile(file, "r").getChannel();
-//
-//        //Get direct byte buffer access using channel.map() operation
-//        MappedByteBuffer buffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
-//
-//        // the buffer now reads the file as if it were loaded in memory.
-//        System.out.println(buffer.capacity());  //Get the size based on content size of file
-//        System.out.println(buffer.limit());
-//
-//        long a = 0;
-//        long b = 0;
-//        long c = 255;
-//        BigInteger sum = BigInteger.valueOf(0);
-//        //You can read the file from this buffer the way you like.
-//        for (int i = 0; i < 536870911; i++) {
-//
-//            b = 0;
-//            c = 255;
-//            for (int j = 0; j < 4; j++) {
-//                a = buffer.get() << (8 * j);
-//                b = b | (a & c);
-//                c = c << (8 * j);
-//            }
-//            BigInteger temp = BigInteger.valueOf(b);
-//            sum = sum.add(temp);
-//
-//        }
-//        System.out.println(sum); //Print the sum
 
         File file = new File(bigFile);
         final ExecutorService executor = Executors.newFixedThreadPool(numThreads);
 
         List<Future<Data>> futures = new ArrayList<>();
         for (int i = 0; i < numThreads; i++) {
+            long chunkSize = 2 * GB / numThreads;
             //вычисляем смещение и длину куска для каждого потока, передаем в конструктор
-            final MyWorker worker = new MyWorker(file, size / 4, i * size / 4);
+            final MyWorker worker = new MyWorker(file, i * chunkSize, chunkSize);
 
             // запускаем задачи на выполнение, сохраняем Future
             final Future<Data> future = executor.submit(worker);
@@ -71,7 +42,7 @@ public class MemoryMappedFileRead {
         }).collect(Collectors.toList());
 
         BigInteger sum = BigInteger.valueOf(0);
-        BigInteger min = new BigInteger("4294967296");
+        BigInteger min = BigInteger.valueOf(Long.MAX_VALUE);
         BigInteger max = BigInteger.valueOf(-1);
         for (Data result : results) {
             sum.add(result.sum);
